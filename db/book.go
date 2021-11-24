@@ -13,7 +13,7 @@ func (db Database) GetAllBooks() (*models.BookList, error) {
 	}
 	for rows.Next() {
 		var book models.Book
-		err := rows.Scan(&book.ID, &book.Name, &book.Genre, &book.Price, &book.Amount, &book.CreatedAt)
+		err := rows.Scan(&book.ID, &book.Name, &book.Genre, &book.Price, &book.Amount)
 		if err != nil {
 			return list, err
 		}
@@ -24,14 +24,12 @@ func (db Database) GetAllBooks() (*models.BookList, error) {
 
 func (db Database) AddBook(book *models.Book) error {
 	var id int
-	var createdAt string
-	query := `INSERT INTO books (name, genre, price, amount) VALUES ($1, $2, $3, $4) RETURNING id, created_at`
-	err := db.Conn.QueryRow(query, book.Name, book.Genre, book.Price, book.Amount).Scan(&id, &createdAt)
+	query := `INSERT INTO books (name, genre, price, amount) VALUES ($1, $2, $3, $4) RETURNING id`
+	err := db.Conn.QueryRow(query, book.Name, book.Genre, book.Price, book.Amount).Scan(&id)
 	if err != nil {
 		return err
 	}
 	book.ID = id
-	book.CreatedAt = createdAt
 	return nil
 }
 
@@ -39,7 +37,7 @@ func (db Database) GetBookById(bookId int) (models.Book, error) {
 	book := models.Book{}
 	query := `SELECT * FROM books WHERE id = $1;`
 	row := db.Conn.QueryRow(query, bookId)
-	switch err := row.Scan(&book.ID, &book.Name, &book.Genre, &book.Price, &book.Amount, &book.CreatedAt); err {
+	switch err := row.Scan(&book.ID, &book.Name, &book.Genre, &book.Price, &book.Amount); err {
 	case sql.ErrNoRows:
 		return book, ErrNoMatch
 	default:
@@ -60,10 +58,11 @@ func (db Database) DeleteBook(bookId int) error {
 
 func (db Database) UpdateBook(bookId int, bookData models.Book) (models.Book, error) {
 	book := models.Book{}
-	query := `UPDATE books SET name=$1, genre=$2, price=$3, amount=$4 WHERE id=$3 RETURNING id, name, genre, price, amount, created_at;`
+	query := `UPDATE books SET name=$1, genre=$2, price=$3, amount=$4 WHERE id=$3 RETURNING id, name, genre, price, amount;`
 	err := db.Conn.QueryRow(
 		query, bookData.Name, bookData.Genre, bookData.Price, bookData.Amount, bookId).Scan(
-		&book.ID, &book.Name, &book.Genre, &book.Price, &book.Amount, &book.CreatedAt)
+		&book.ID, &book.Name, &book.Genre, &book.Price, &book.Amount)
+
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return book, ErrNoMatch

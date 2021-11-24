@@ -6,12 +6,11 @@ import (
 )
 
 type Book struct {
-	ID        int    `json:"id"`
-	Name      string `json:"name"`
-	Genre     int    `json:"genre"`
-	Price     string `json:"price"`
-	Amount    int    `json:"amount"`
-	CreatedAt string `json:"created_at"`
+	ID     int     `json:"id"`
+	Name   string  `json:"name"`
+	Genre  int     `json:"genre"`
+	Price  float64 `json:"price"`
+	Amount int     `json:"amount"`
 }
 type BookList struct {
 	Books []Book `json:"books"`

@@ -15,6 +15,7 @@ import (
 var bookIDKey = "bookID"
 
 func books(router chi.Router) {
+	log.Printf("books called successfully")
 	router.Get("/", getAllBooks)
 	router.Post("/", createBook)
 	router.Route("/{bookID}", func(router chi.Router) {
@@ -54,6 +55,7 @@ func createBook(w http.ResponseWriter, r *http.Request) {
 		render.Render(w, r, ErrorRenderer(err))
 		return
 	}
+	log.Printf("createBook called 2")
 	if err := render.Render(w, r, book); err != nil {
 		render.Render(w, r, ServerErrorRenderer(err))
 		return
