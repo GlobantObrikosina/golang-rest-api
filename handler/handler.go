@@ -3,7 +3,7 @@ package handler
 import (
 	"github.com/go-chi/chi"
 	"github.com/go-chi/render"
-	"gitlab.com/idoko/bucketeer/db"
+	"github.com/GlobantObrikosina/golang-rest-api/db"
 	"log"
 	"net/http"
 )

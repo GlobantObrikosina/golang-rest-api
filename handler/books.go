@@ -3,10 +3,10 @@ package handler
 import (
 	"context"
 	"fmt"
+	"github.com/GlobantObrikosina/golang-rest-api/db"
+	"github.com/GlobantObrikosina/golang-rest-api/models"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/render"
-	"gitlab.com/idoko/bucketeer/db"
-	"gitlab.com/idoko/bucketeer/models"
 	"log"
 	"net/http"
 	"strconv"

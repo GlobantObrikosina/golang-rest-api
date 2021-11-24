@@ -1,10 +1,9 @@
-module gitlab.com/idoko/bucketeer
+module github.com/GlobantObrikosina/golang-rest-api
 
 go 1.17
 
 require (
 	github.com/go-chi/chi v1.5.4
 	github.com/go-chi/render v1.0.1
-	github.com/golang-migrate/migrate v3.5.4+incompatible // indirect
 	github.com/lib/pq v1.10.4
 )

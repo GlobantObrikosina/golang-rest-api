@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS books (
-                                     id SERIAL PRIMARY KEY,
+                                     id SERIAL UNIQUE PRIMARY KEY,
                                      name VARCHAR(100) NOT NULL,
     price NUMERIC(2) NOT NULL,
     genre INT NOT NULL,

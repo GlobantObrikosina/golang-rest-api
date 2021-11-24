@@ -2,7 +2,7 @@ package db
 
 import (
 	"database/sql"
-	"gitlab.com/idoko/bucketeer/models"
+	"github.com/GlobantObrikosina/golang-rest-api/models"
 )
 
 func (db Database) GetAllBooks() (*models.BookList, error) {

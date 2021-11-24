@@ -17,10 +17,10 @@ services:
     depends_on:
       - database
     volumes:
-      - C:/Users/ilya.sachek/Documents/bucketeer/db/migrations:/database
+      - C:/Users/ilya.sachek/golang-rest-api/db/migrations:/database
     # here instead of localhost as the host we use databaseservicename as that is the name we gave to the postgres service
     command:
-      [ "-path", "/database", "-database",  "postgres://bucketeer:bucketeer_pass@database:5432/bucketeer_db?sslmode=disable", "up" ]
+      [ "-path", "/database", "-database",  "postgres://golang-rest-api:golang-rest-api_pass@database:5432/golang-rest-api_db?sslmode=disable", "up" ]
   server:
     build:
       context: .

@@ -3,8 +3,8 @@ package main
 import (
 	"context"
 	"fmt"
-	"gitlab.com/idoko/bucketeer/db"
-	"gitlab.com/idoko/bucketeer/handler"
+	"github.com/GlobantObrikosina/golang-rest-api/db"
+	"github.com/GlobantObrikosina/golang-rest-api/handler"
 	"log"
 	"net"
 	"net/http"
@@ -44,6 +44,7 @@ func main() {
 	log.Println(fmt.Sprint(<-ch))
 	log.Println("Stopping API server.")
 }
+
 func Stop(server *http.Server) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
