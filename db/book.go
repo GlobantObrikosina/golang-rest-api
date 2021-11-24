@@ -5,9 +5,24 @@ import (
 	"github.com/GlobantObrikosina/golang-rest-api/models"
 )
 
-func (db Database) GetAllBooks() (*models.BookList, error) {
+func (db Database) GetAllBooks(booksFilter *models.GetBooks) (*models.BookList, error) {
 	list := &models.BookList{}
-	rows, err := db.Conn.Query("SELECT * FROM books ORDER BY ID DESC")
+	var query string
+	var err error
+	rows := &sql.Rows{}
+	if booksFilter.Name != "" && booksFilter.Genre != 0 {
+		query = "SELECT * FROM books WHERE amount > 0 AND name = $1 AND genre = $2 ORDER BY ID DESC"
+		rows, err = db.Conn.Query(query, booksFilter.Name, booksFilter.Genre)
+	} else if booksFilter.Name != "" {
+		query = "SELECT * FROM books WHERE amount > 0 AND name = $1 ORDER BY ID DESC"
+		rows, err = db.Conn.Query(query, booksFilter.Name)
+	} else if booksFilter.Genre != 0 {
+		query = "SELECT * FROM books WHERE amount > 0 AND genre = $1 ORDER BY ID DESC"
+		rows, err = db.Conn.Query(query, booksFilter.Genre)
+	} else {
+		query = "SELECT * FROM books WHERE amount > 0 ORDER BY ID DESC"
+		rows, err = db.Conn.Query(query)
+	}
 	if err != nil {
 		return list, err
 	}
@@ -58,7 +73,7 @@ func (db Database) DeleteBook(bookId int) error {
 
 func (db Database) UpdateBook(bookId int, bookData models.Book) (models.Book, error) {
 	book := models.Book{}
-	query := `UPDATE books SET name=$1, genre=$2, price=$3, amount=$4 WHERE id=$3 RETURNING id, name, genre, price, amount;`
+	query := `UPDATE books SET name=$1, genre=$2, price=$3, amount=$4 WHERE id=$5 RETURNING id, name, genre, price, amount;`
 	err := db.Conn.QueryRow(
 		query, bookData.Name, bookData.Genre, bookData.Price, bookData.Amount, bookId).Scan(
 		&book.ID, &book.Name, &book.Genre, &book.Price, &book.Amount)

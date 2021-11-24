@@ -45,25 +45,27 @@ func BookContext(next http.Handler) http.Handler {
 
 func createBook(w http.ResponseWriter, r *http.Request) {
 	book := &models.Book{}
-	log.Printf("createBook called %s", r)
 	if err := render.Bind(r, book); err != nil {
 		render.Render(w, r, ErrBadRequest)
 		return
 	}
-	log.Printf("createBook called 1")
 	if err := dbInstance.AddBook(book); err != nil {
 		render.Render(w, r, ErrorRenderer(err))
 		return
 	}
-	log.Printf("createBook called 2")
-	if err := render.Render(w, r, book); err != nil {
+	if err := render.Render(w, r, models.CreateBookResponse{BookID: book.ID}); err != nil {
 		render.Render(w, r, ServerErrorRenderer(err))
 		return
 	}
 }
 
 func getAllBooks(w http.ResponseWriter, r *http.Request) {
-	books, err := dbInstance.GetAllBooks()
+	booksFilter := &models.GetBooks{}
+	if err := render.Bind(r, booksFilter); err != nil {
+		render.Render(w, r, ErrBadRequest)
+		return
+	}
+	books, err := dbInstance.GetAllBooks(booksFilter)
 	if err != nil {
 		render.Render(w, r, ServerErrorRenderer(err))
 		return
@@ -99,8 +101,8 @@ func deleteBook(w http.ResponseWriter, r *http.Request) {
 		} else {
 			render.Render(w, r, ServerErrorRenderer(err))
 		}
-		return
 	}
+	render.NoContent(w, r)
 }
 
 func updateBook(w http.ResponseWriter, r *http.Request) {

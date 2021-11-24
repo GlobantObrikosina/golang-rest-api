@@ -9,9 +9,6 @@ services:
       - "5432:5432"
     volumes:
       - data:/var/lib/postgresql/data
-    #if we had another container that wanted to access migrate container at let say
-    #port 1000
-    #and it's in the same compose file  we would have written migrate:1000
   migrate:
     image: migrate/migrate
     depends_on:
@@ -31,6 +28,6 @@ services:
     networks:
       - default
     ports:
-    - "8080:8080"
+      - "8080:8080"
 volumes:
   data:

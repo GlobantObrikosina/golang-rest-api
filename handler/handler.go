@@ -1,10 +1,9 @@
 package handler
 
 import (
+	"github.com/GlobantObrikosina/golang-rest-api/db"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/render"
-	"github.com/GlobantObrikosina/golang-rest-api/db"
-	"log"
 	"net/http"
 )
 
@@ -16,7 +15,6 @@ func NewHandler(db db.Database) http.Handler {
 	router.MethodNotAllowed(methodNotAllowedHandler)
 	router.NotFound(notFoundHandler)
 	router.Route("/books", books)
-	log.Printf("NewHandler called successfully")
 	return router
 }
 
