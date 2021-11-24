@@ -1,0 +1,36 @@
+version: "3.7"
+services:
+  database:
+    image: postgres
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - "5432:5432"
+    volumes:
+      - data:/var/lib/postgresql/data
+    #if we had another container that wanted to access migrate container at let say
+    #port 1000
+    #and it's in the same compose file  we would have written migrate:1000
+  migrate:
+    image: migrate/migrate
+    depends_on:
+      - database
+    volumes:
+      - C:/Users/ilya.sachek/Documents/bucketeer/db/migrations:/database
+    # here instead of localhost as the host we use databaseservicename as that is the name we gave to the postgres service
+    command:
+      [ "-path", "/database", "-database",  "postgres://bucketeer:bucketeer_pass@database:5432/bucketeer_db?sslmode=disable", "up" ]
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file: .env
+    depends_on:
+      - database
+    networks:
+      - default
+    ports:
+    - "8080:8080"
+volumes:
+  data:
