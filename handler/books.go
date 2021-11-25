@@ -46,7 +46,7 @@ func BookContext(next http.Handler) http.Handler {
 func createBook(w http.ResponseWriter, r *http.Request) {
 	book := &models.Book{}
 	if err := render.Bind(r, book); err != nil {
-		render.Render(w, r, ErrBadRequest)
+		render.Render(w, r, ErrorRenderer(err))
 		return
 	}
 	if err := dbInstance.AddBook(book); err != nil {
