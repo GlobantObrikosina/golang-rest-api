@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/GlobantObrikosina/golang-rest-api/db"
 	"github.com/GlobantObrikosina/golang-rest-api/handler"
+	"github.com/GlobantObrikosina/golang-rest-api/service"
 	"log"
 	"net"
 	"net/http"
@@ -24,16 +25,13 @@ func main() {
 		os.Getenv("POSTGRES_USER"),
 		os.Getenv("POSTGRES_PASSWORD"),
 		os.Getenv("POSTGRES_DB")
-	database, err := db.Initialize(dbUser, dbPassword, dbName)
-	if err != nil {
-		log.Fatalf("Could not set up database: %v", err)
-	}
-	defer database.Close()
 
-	httpHandler := handler.NewHandler(database)
-	server := &http.Server{
-		Handler: httpHandler,
-	}
+	database := db.NewDatabase(dbUser, dbPassword, dbName)
+	services := service.NewService(database)
+	httpHandler := handler.NewHandler(services)
+
+	defer database.Close()
+	server := &http.Server{Handler: httpHandler.InitRoutes()}
 	go func() {
 		err := server.Serve(listener)
 		if err != nil {
