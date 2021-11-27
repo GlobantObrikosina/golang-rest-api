@@ -16,13 +16,13 @@ var bookIDKey = "bookID"
 
 func books(router chi.Router) {
 	log.Printf("books called successfully")
-	router.Get("/", getAllBooks)
-	router.Post("/", createBook)
+	router.Get("/", GetAllBooks)
+	router.Post("/", CreateBook)
 	router.Route("/{bookID}", func(router chi.Router) {
 		router.Use(BookContext)
-		router.Get("/", getBook)
-		router.Put("/", updateBook)
-		router.Delete("/", deleteBook)
+		router.Get("/", GetBook)
+		router.Put("/", UpdateBook)
+		router.Delete("/", DeleteBook)
 	})
 }
 
@@ -43,13 +43,13 @@ func BookContext(next http.Handler) http.Handler {
 	})
 }
 
-func createBook(w http.ResponseWriter, r *http.Request) {
+func CreateBook(w http.ResponseWriter, r *http.Request) {
 	book := &models.Book{}
 	if err := render.Bind(r, book); err != nil {
 		render.Render(w, r, ErrorRenderer(err))
 		return
 	}
-	if err := dbInstance.AddBook(book); err != nil {
+	if err := dbInstance.CreateBook(book); err != nil {
 		render.Render(w, r, ErrorRenderer(err))
 		return
 	}
@@ -59,13 +59,20 @@ func createBook(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func getAllBooks(w http.ResponseWriter, r *http.Request) {
-	booksFilter := &models.GetBooks{}
-	if err := render.Bind(r, booksFilter); err != nil {
-		render.Render(w, r, ErrBadRequest)
-		return
+func GetAllBooks(w http.ResponseWriter, r *http.Request) {
+	filterCondition := r.URL.Query()
+	if len(filterCondition) != 0 {
+		if _, ok := filterCondition["genre"]; !ok {
+			_ = render.Render(w, r, ErrorRenderer(fmt.Errorf("invalid filter condition")))
+			return
+		}
+		genreID, err := strconv.Atoi(filterCondition.Get("genre"))
+		if err != nil || genreID < 1 || genreID > 3 {
+			_ = render.Render(w, r, ErrorRenderer(fmt.Errorf("invalid filter condition")))
+			return
+		}
 	}
-	books, err := dbInstance.GetAllBooks(booksFilter)
+	books, err := dbInstance.GetAllBooks(filterCondition)
 	if err != nil {
 		render.Render(w, r, ServerErrorRenderer(err))
 		return
@@ -75,9 +82,9 @@ func getAllBooks(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func getBook(w http.ResponseWriter, r *http.Request) {
+func GetBook(w http.ResponseWriter, r *http.Request) {
 	bookID := r.Context().Value(bookIDKey).(int)
-	book, err := dbInstance.GetBookById(bookID)
+	book, err := dbInstance.GetBookByID(bookID)
 	if err != nil {
 		if err == db.ErrNoMatch {
 			render.Render(w, r, ErrNotFound)
@@ -92,9 +99,9 @@ func getBook(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func deleteBook(w http.ResponseWriter, r *http.Request) {
+func DeleteBook(w http.ResponseWriter, r *http.Request) {
 	bookID := r.Context().Value(bookIDKey).(int)
-	err := dbInstance.DeleteBook(bookID)
+	err := dbInstance.DeleteBookByID(bookID)
 	if err != nil {
 		if err == db.ErrNoMatch {
 			render.Render(w, r, ErrNotFound)
@@ -105,14 +112,14 @@ func deleteBook(w http.ResponseWriter, r *http.Request) {
 	render.NoContent(w, r)
 }
 
-func updateBook(w http.ResponseWriter, r *http.Request) {
+func UpdateBook(w http.ResponseWriter, r *http.Request) {
 	bookID := r.Context().Value(bookIDKey).(int)
 	bookData := models.Book{}
 	if err := render.Bind(r, &bookData); err != nil {
 		render.Render(w, r, ErrBadRequest)
 		return
 	}
-	book, err := dbInstance.UpdateBook(bookID, bookData)
+	newBookID, err := dbInstance.UpdateBookByID(bookID, bookData)
 	if err != nil {
 		if err == db.ErrNoMatch {
 			render.Render(w, r, ErrNotFound)
@@ -121,7 +128,7 @@ func updateBook(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-	if err := render.Render(w, r, &book); err != nil {
+	if err := render.Render(w, r, models.CreateBookResponse{BookID: newBookID}); err != nil {
 		render.Render(w, r, ServerErrorRenderer(err))
 		return
 	}

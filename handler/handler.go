@@ -7,9 +7,9 @@ import (
 	"net/http"
 )
 
-var dbInstance db.Database
+var dbInstance db.DatabaseBooksManager
 
-func NewHandler(db db.Database) http.Handler {
+func NewHandler(db db.DatabaseBooksManager) http.Handler {
 	router := chi.NewRouter()
 	dbInstance = db
 	router.MethodNotAllowed(methodNotAllowedHandler)

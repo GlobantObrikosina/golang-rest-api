@@ -5,24 +5,20 @@ import (
 	"github.com/GlobantObrikosina/golang-rest-api/models"
 )
 
-func (db Database) GetAllBooks(booksFilter *models.GetBooks) (*models.BookList, error) {
+func (db Database) GetAllBooks(booksFilter map[string][]string) (*models.BookList, error) {
 	list := &models.BookList{}
 	var query string
 	var err error
 	rows := &sql.Rows{}
-	if booksFilter.Name != "" && booksFilter.Genre != 0 {
-		query = "SELECT * FROM books WHERE amount > 0 AND name = $1 AND genre = $2 ORDER BY ID DESC"
-		rows, err = db.Conn.Query(query, booksFilter.Name, booksFilter.Genre)
-	} else if booksFilter.Name != "" {
-		query = "SELECT * FROM books WHERE amount > 0 AND name = $1 ORDER BY ID DESC"
-		rows, err = db.Conn.Query(query, booksFilter.Name)
-	} else if booksFilter.Genre != 0 {
-		query = "SELECT * FROM books WHERE amount > 0 AND genre = $1 ORDER BY ID DESC"
-		rows, err = db.Conn.Query(query, booksFilter.Genre)
-	} else {
+
+	if len(booksFilter) == 0 {
 		query = "SELECT * FROM books WHERE amount > 0 ORDER BY ID DESC"
 		rows, err = db.Conn.Query(query)
+	} else {
+		query = "SELECT * FROM books WHERE amount > 0 AND genre = $1 ORDER BY ID DESC"
+		rows, err = db.Conn.Query(query, booksFilter["genre"][0])
 	}
+
 	if err != nil {
 		return list, err
 	}
@@ -37,18 +33,19 @@ func (db Database) GetAllBooks(booksFilter *models.GetBooks) (*models.BookList, 
 	return list, nil
 }
 
-func (db Database) AddBook(book *models.Book) error {
+func (db Database) CreateBook(book *models.Book) error {
 	var id int
 	query := `INSERT INTO books (name, genre, price, amount) VALUES ($1, $2, $3, $4) RETURNING id`
 	err := db.Conn.QueryRow(query, book.Name, book.Genre, book.Price, book.Amount).Scan(&id)
 	if err != nil {
+		book.ID = 0
 		return err
 	}
 	book.ID = id
 	return nil
 }
 
-func (db Database) GetBookById(bookId int) (models.Book, error) {
+func (db Database) GetBookByID(bookId int) (models.Book, error) {
 	book := models.Book{}
 	query := `SELECT * FROM books WHERE id = $1;`
 	row := db.Conn.QueryRow(query, bookId)
@@ -60,7 +57,7 @@ func (db Database) GetBookById(bookId int) (models.Book, error) {
 	}
 }
 
-func (db Database) DeleteBook(bookId int) error {
+func (db Database) DeleteBookByID(bookId int) error {
 	query := `DELETE FROM books WHERE id = $1;`
 	_, err := db.Conn.Exec(query, bookId)
 	switch err {
@@ -71,18 +68,21 @@ func (db Database) DeleteBook(bookId int) error {
 	}
 }
 
-func (db Database) UpdateBook(bookId int, bookData models.Book) (models.Book, error) {
-	book := models.Book{}
-	query := `UPDATE books SET name=$1, genre=$2, price=$3, amount=$4 WHERE id=$5 RETURNING id, name, genre, price, amount;`
+func (db Database) UpdateBookByID(bookId int, bookData models.Book) (int, error) {
+	query := `UPDATE books SET name=$1, genre=$2, price=$3, amount=$4 WHERE id=$5 RETURNING id;`
+	var newBookID int
 	err := db.Conn.QueryRow(
-		query, bookData.Name, bookData.Genre, bookData.Price, bookData.Amount, bookId).Scan(
-		&book.ID, &book.Name, &book.Genre, &book.Price, &book.Amount)
+		query, bookData.Name, bookData.Genre, bookData.Price, bookData.Amount, bookId).Scan(&newBookID)
 
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return book, ErrNoMatch
+			return newBookID, ErrNoMatch
 		}
-		return book, err
+		return newBookID, err
 	}
-	return book, nil
+	return newBookID, nil
+}
+
+func (db Database) Close() error {
+	return db.Conn.Close()
 }

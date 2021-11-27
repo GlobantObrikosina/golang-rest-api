@@ -28,7 +28,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Could not set up database: %v", err)
 	}
-	defer database.Conn.Close()
+	defer database.Close()
 
 	httpHandler := handler.NewHandler(database)
 	server := &http.Server{
