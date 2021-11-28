@@ -9,15 +9,14 @@ services:
       - "5432:5432"
     volumes:
       - data:/var/lib/postgresql/data
-  migrate:
-    image: migrate/migrate
-    depends_on:
-      - database
-    volumes:
-      - C:/Users/ilya.sachek/golang-rest-api/db/migrations:/database
-    # here instead of localhost as the host we use databaseservicename as that is the name we gave to the postgres service
-    command:
-      [ "-path", "/database", "-database",  "postgres://golang-rest-api:golang-rest-api_pass@database:5432/golang-rest-api_db?sslmode=disable", "up" ]
+#  migrate:
+#    image: migrate/migrate
+#    depends_on:
+#      - database
+#    volumes:
+#      - C:/Users/ilya.sachek/golang-rest-api/db/migrations:/database
+#    command:
+#      [ "-path", "/database", "-database",  "postgres://golang-rest-api:golang-rest-api_pass@database:5432/golang-rest-api_db?sslmode=disable", "up" ]
   server:
     build:
       context: .
