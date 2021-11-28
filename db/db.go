@@ -119,9 +119,9 @@ func (db Database) UpdateBookByID(bookId int, bookData models.Book) (int, error)
 
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return newBookID, ErrNoMatch
+			return 0, ErrNoMatch
 		}
-		return newBookID, err
+		return 0, err
 	}
 	return newBookID, nil
 }

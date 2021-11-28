@@ -3,7 +3,6 @@ package handler
 import (
 	"context"
 	"fmt"
-	"github.com/GlobantObrikosina/golang-rest-api/db"
 	"github.com/GlobantObrikosina/golang-rest-api/models"
 	"github.com/GlobantObrikosina/golang-rest-api/service"
 	"github.com/go-chi/chi"
@@ -46,24 +45,21 @@ func (h *Handler) books(router chi.Router) {
 	router.Get("/", h.GetAllBooks)
 	router.Post("/", h.CreateBook)
 	router.Route("/{bookID}", func(router chi.Router) {
-		router.Use(BookContext)
+		router.Use(h.BookContext)
 		router.Get("/", h.GetBook)
 		router.Put("/", h.UpdateBook)
-		router.Delete("/", h.DeleteBook)
+		router.Delete("/", h.DeleteBookByID)
 	})
 }
 
-func BookContext(next http.Handler) http.Handler {
+func (h *Handler) BookContext(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		bookID := chi.URLParam(r, "bookID")
 
-		if bookID == "" {
-			render.Render(w, r, ErrorRenderer(fmt.Errorf("book ID is required")))
-			return
-		}
 		id, err := strconv.Atoi(bookID)
 		if err != nil {
-			render.Render(w, r, ErrorRenderer(fmt.Errorf("invalid book ID")))
+			_ = render.Render(w, r, ErrorRenderer(fmt.Errorf("invalid book ID")))
+			return
 		}
 		ctx := context.WithValue(r.Context(), bookIDKey, id)
 		next.ServeHTTP(w, r.WithContext(ctx))
@@ -85,26 +81,26 @@ func (h *Handler) GetAllBooks(w http.ResponseWriter, r *http.Request) {
 	}
 	books, err := h.service.GetAllBooks(filterCondition)
 	if err != nil {
-		render.Render(w, r, ServerErrorRenderer(err))
+		_ = render.Render(w, r, ServerErrorRenderer(err))
 		return
 	}
 	if err := render.Render(w, r, books); err != nil {
-		render.Render(w, r, ErrorRenderer(err))
+		_ = render.Render(w, r, ErrorRenderer(err))
 	}
 }
 
 func (h *Handler) CreateBook(w http.ResponseWriter, r *http.Request) {
 	book := &models.Book{}
 	if err := render.Bind(r, book); err != nil {
-		render.Render(w, r, ErrorRenderer(err))
+		_ = render.Render(w, r, ErrorRenderer(err))
 		return
 	}
 	if err := h.service.CreateBook(book); err != nil {
-		render.Render(w, r, ErrorRenderer(err))
+		_ = render.Render(w, r, ServerErrorRenderer(err))
 		return
 	}
 	if err := render.Render(w, r, models.CreateBookResponse{BookID: book.ID}); err != nil {
-		render.Render(w, r, ServerErrorRenderer(err))
+		_ = render.Render(w, r, ServerErrorRenderer(err))
 		return
 	}
 }
@@ -113,28 +109,20 @@ func (h *Handler) GetBook(w http.ResponseWriter, r *http.Request) {
 	bookID := r.Context().Value(bookIDKey).(int)
 	book, err := h.service.GetBookByID(bookID)
 	if err != nil {
-		if err == db.ErrNoMatch {
-			render.Render(w, r, ErrNotFound)
-		} else {
-			render.Render(w, r, ErrorRenderer(err))
-		}
+		_ = render.Render(w, r, ErrorRenderer(err))
 		return
 	}
 	if err := render.Render(w, r, &book); err != nil {
-		render.Render(w, r, ServerErrorRenderer(err))
+		_ = render.Render(w, r, ServerErrorRenderer(err))
 		return
 	}
 }
 
-func (h *Handler) DeleteBook(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) DeleteBookByID(w http.ResponseWriter, r *http.Request) {
 	bookID := r.Context().Value(bookIDKey).(int)
 	err := h.service.DeleteBookByID(bookID)
 	if err != nil {
-		if err == db.ErrNoMatch {
-			render.Render(w, r, ErrNotFound)
-		} else {
-			render.Render(w, r, ServerErrorRenderer(err))
-		}
+		_ = render.Render(w, r, ErrorRenderer(err))
 	}
 	render.NoContent(w, r)
 }
@@ -143,20 +131,16 @@ func (h *Handler) UpdateBook(w http.ResponseWriter, r *http.Request) {
 	bookID := r.Context().Value(bookIDKey).(int)
 	bookData := models.Book{}
 	if err := render.Bind(r, &bookData); err != nil {
-		render.Render(w, r, ErrBadRequest)
+		_ = render.Render(w, r, ErrorRenderer(err))
 		return
 	}
 	newBookID, err := h.service.UpdateBookByID(bookID, bookData)
 	if err != nil {
-		if err == db.ErrNoMatch {
-			render.Render(w, r, ErrNotFound)
-		} else {
-			render.Render(w, r, ServerErrorRenderer(err))
-		}
+		_ = render.Render(w, r, ErrorRenderer(err))
 		return
 	}
 	if err := render.Render(w, r, models.CreateBookResponse{BookID: newBookID}); err != nil {
-		render.Render(w, r, ServerErrorRenderer(err))
+		_ = render.Render(w, r, ServerErrorRenderer(err))
 		return
 	}
 }

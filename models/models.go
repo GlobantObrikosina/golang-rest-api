@@ -8,8 +8,8 @@ import (
 type Book struct {
 	ID     int     `json:"id"`
 	Name   string  `json:"name" binding:"min=1,max=100"`
-	Genre  int     `json:"genre" binding:"min=0"`
-	Price  float64 `json:"price" binding:"min=1,max=3"`
+	Genre  int     `json:"genre" binding:"min=1,max=3"`
+	Price  float64 `json:"price" binding:"min=0"`
 	Amount int     `json:"amount" binding:"min=0"`
 }
 type BookList struct {
