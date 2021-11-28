@@ -445,7 +445,3 @@ func TestUpdateBook(t *testing.T) {
 		})
 	}
 }
-
-func TestHandler(t *testing.T) {
-
-}
