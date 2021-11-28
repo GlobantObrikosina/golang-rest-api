@@ -30,13 +30,13 @@ func (h *Handler) InitRoutes() http.Handler {
 func methodNotAllowedHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-type", "application/json")
 	w.WriteHeader(405)
-	render.Render(w, r, ErrMethodNotAllowed)
+	_ = render.Render(w, r, ErrMethodNotAllowed)
 }
 
 func notFoundHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-type", "application/json")
 	w.WriteHeader(400)
-	render.Render(w, r, ErrNotFound)
+	_ = render.Render(w, r, ErrNotFound)
 }
 
 var bookIDKey = "bookID"
