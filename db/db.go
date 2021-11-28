@@ -55,9 +55,11 @@ func (db Database) GetAllBooks(booksFilter map[string][]string) (*models.BookLis
 	rows := &sql.Rows{}
 
 	if len(booksFilter) == 0 {
+		log.Printf("------------ filter")
 		query = "SELECT * FROM books WHERE amount > 0 ORDER BY ID DESC"
 		rows, err = db.Conn.Query(query)
 	} else {
+		log.Printf("++++++++++++ filter")
 		query = "SELECT * FROM books WHERE amount > 0 AND genre = $1 ORDER BY ID DESC"
 		rows, err = db.Conn.Query(query, booksFilter["genre"][0])
 	}
@@ -71,8 +73,10 @@ func (db Database) GetAllBooks(booksFilter map[string][]string) (*models.BookLis
 		if err != nil {
 			return list, err
 		}
+		log.Printf("Book added to list")
 		list.Books = append(list.Books, book)
 	}
+	log.Printf("len(list.Books) %d", len(list.Books))
 	return list, nil
 }
 

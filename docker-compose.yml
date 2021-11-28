@@ -14,13 +14,14 @@ services:
 #    depends_on:
 #      - database
 #    volumes:
-#      - C:/Users/ilya.sachek/golang-rest-api/db/migrations:/database
+#      - /home/ilya/Documents/golang-rest-api/migrations:/database
 #    command:
 #      [ "-path", "/database", "-database",  "postgres://golang-rest-api:golang-rest-api_pass@database:5432/golang-rest-api_db?sslmode=disable", "up" ]
   server:
     build:
       context: .
       dockerfile: Dockerfile
+    command: ./wait-for-postgres.sh db ./restapi
     env_file: .env
     depends_on:
       - database
