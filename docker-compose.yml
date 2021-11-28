@@ -9,14 +9,14 @@ services:
       - "5432:5432"
     volumes:
       - data:/var/lib/postgresql/data
-#  migrate:
-#    image: migrate/migrate
-#    depends_on:
-#      - database
-#    volumes:
-#      - /home/ilya/Documents/golang-rest-api/migrations:/database
-#    command:
-#      [ "-path", "/database", "-database",  "postgres://golang-rest-api:golang-rest-api_pass@database:5432/golang-rest-api_db?sslmode=disable", "up" ]
+  migrate:
+    image: migrate/migrate
+    depends_on:
+      - database
+    volumes:
+      - ./migrations:/database
+    command:
+      [ "-path", "/database", "-database",  "postgres://golang-rest-api:golang-rest-api_pass@database:5432/golang-rest-api_db?sslmode=disable", "up" ]
   server:
     build:
       context: .

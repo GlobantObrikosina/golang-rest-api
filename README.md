@@ -3,26 +3,22 @@ It's a simple REST API application written in Golang using GORM and PostgreSQL. 
 ## How to run
 Build and run
 ```
-make build && make run
-```
-Or with one command
-```
 build-run
 ```
-If you run for the first time, make migration-up. Before it make sure your PostgreSQL server is stopped.
+It automatically migrates up as first launched so there is no need to make a command for it
 ```
 make migration-up
 ```
-you can also migration-down
+You can also migration-down
 ```
 make migration-down
 ```
-stop all containers
+Stop all containers
 ```
 make stop
 ```
 ## In addition
-run tests
+Run tests
 ```
 make test
 ```
