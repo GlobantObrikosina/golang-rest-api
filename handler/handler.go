@@ -69,7 +69,9 @@ func (h *Handler) BookContext(next http.Handler) http.Handler {
 func (h *Handler) GetAllBooks(w http.ResponseWriter, r *http.Request) {
 	filterCondition := r.URL.Query()
 	if len(filterCondition) != 0 {
-		if _, ok := filterCondition["genre"]; !ok {
+		_, okGenre := filterCondition["genre"]
+		_, okName := filterCondition["name"]
+		if !okGenre && !okName {
 			_ = render.Render(w, r, ErrorRenderer(fmt.Errorf("invalid filter condition")))
 			return
 		}

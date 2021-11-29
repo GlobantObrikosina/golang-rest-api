@@ -53,14 +53,20 @@ func (db Database) GetAllBooks(booksFilter map[string][]string) (*models.BookLis
 	var err error
 	rows := &sql.Rows{}
 
+	_, okGenre := booksFilter["genre"]
+	_, okName := booksFilter["name"]
 	if len(booksFilter) == 0 {
-		log.Printf("------------ filter")
 		query = "SELECT * FROM books WHERE amount > 0 ORDER BY ID DESC"
 		rows, err = db.Conn.Query(query)
-	} else {
-		log.Printf("++++++++++++ filter")
+	} else if okGenre && okName {
+		query = "SELECT * FROM books WHERE amount > 0 AND genre = $1 AND name = $2 ORDER BY ID DESC"
+		rows, err = db.Conn.Query(query, booksFilter["genre"][0], booksFilter["name"][0])
+	} else if okGenre {
 		query = "SELECT * FROM books WHERE amount > 0 AND genre = $1 ORDER BY ID DESC"
 		rows, err = db.Conn.Query(query, booksFilter["genre"][0])
+	} else if okName {
+		query = "SELECT * FROM books WHERE amount > 0 AND name = $1 ORDER BY ID DESC"
+		rows, err = db.Conn.Query(query, booksFilter["name"][0])
 	}
 
 	if err != nil {
@@ -72,10 +78,8 @@ func (db Database) GetAllBooks(booksFilter map[string][]string) (*models.BookLis
 		if err != nil {
 			return list, err
 		}
-		log.Printf("Book added to list")
 		list.Books = append(list.Books, book)
 	}
-	log.Printf("len(list.Books) %d", len(list.Books))
 	return list, nil
 }
 

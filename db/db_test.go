@@ -41,11 +41,38 @@ func TestGetAllBooks(t *testing.T) {
 			},
 		},
 		{
-			name:            "Filter",
+			name:            "Filter genre",
 			filterCondition: map[string][]string{"genre": {"1"}},
 			mockBehavior: func(filterCondition map[string][]string) {
 				genreId := filterCondition["genre"][0]
 				mock.ExpectQuery(regexp.QuoteMeta(`SELECT`)).WithArgs(genreId).
+					WillReturnRows(sqlmock.NewRows([]string{"id", "name", "price", "genre", "amount"}).
+						AddRow(1, "book1", 1, 3.7, 1))
+			},
+			expectedBooks: []models.Book{
+				{ID: 1, Name: "book1", Genre: 1, Price: 3.7, Amount: 1},
+			},
+		},
+		{
+			name:            "Filter name",
+			filterCondition: map[string][]string{"name": {"book1"}},
+			mockBehavior: func(filterCondition map[string][]string) {
+				name := filterCondition["name"][0]
+				mock.ExpectQuery(regexp.QuoteMeta(`SELECT`)).WithArgs(name).
+					WillReturnRows(sqlmock.NewRows([]string{"id", "name", "price", "genre", "amount"}).
+						AddRow(1, "book1", 1, 3.7, 1))
+			},
+			expectedBooks: []models.Book{
+				{ID: 1, Name: "book1", Genre: 1, Price: 3.7, Amount: 1},
+			},
+		},
+		{
+			name:            "Filter name and genre",
+			filterCondition: map[string][]string{"name": {"book1"}, "genre": {"1"}},
+			mockBehavior: func(filterCondition map[string][]string) {
+				name := filterCondition["name"][0]
+				genre := filterCondition["genre"][0]
+				mock.ExpectQuery(regexp.QuoteMeta(`SELECT`)).WithArgs(genre, name).
 					WillReturnRows(sqlmock.NewRows([]string{"id", "name", "price", "genre", "amount"}).
 						AddRow(1, "book1", 1, 3.7, 1))
 			},
