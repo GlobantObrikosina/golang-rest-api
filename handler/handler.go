@@ -75,10 +75,12 @@ func (h *Handler) GetAllBooks(w http.ResponseWriter, r *http.Request) {
 			_ = render.Render(w, r, ErrorRenderer(fmt.Errorf("invalid filter condition")))
 			return
 		}
-		genreID, err := strconv.Atoi(filterCondition.Get("genre"))
-		if err != nil || genreID < 1 || genreID > 3 {
-			_ = render.Render(w, r, ErrorRenderer(fmt.Errorf("invalid filter condition")))
-			return
+		if okGenre {
+			genreID, err := strconv.Atoi(filterCondition.Get("genre"))
+			if err != nil || genreID < 1 || genreID > 3 {
+				_ = render.Render(w, r, ErrorRenderer(fmt.Errorf("invalid filter condition")))
+				return
+			}
 		}
 	}
 	books, err := h.service.GetAllBooks(filterCondition)
