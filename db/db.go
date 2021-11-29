@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"github.com/GlobantObrikosina/golang-rest-api/models"
+	_ "github.com/lib/pq"
 	"log"
 )
 
