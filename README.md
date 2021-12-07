@@ -1,5 +1,5 @@
 # golang-rest-api
-It's a simple REST API application written in Golang using GORM and PostgreSQL. To run you need [docker](https://www.docker.com/) to be installed  
+It's a simple REST API application written in Golang using PostgreSQL. To run you need [docker](https://www.docker.com/) to be installed  
 ## How to run
 Build and run
 ```

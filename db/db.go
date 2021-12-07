@@ -18,7 +18,7 @@ var ErrNoMatch = fmt.Errorf("no matching record")
 
 type DatabaseBooksManager interface {
 	GetAllBooks(filterCondition map[string][]string) (*models.BookList, error)
-	CreateBook(book *models.Book) error
+	CreateBook(book *models.Book) (int, error)
 	GetBookByID(bookId int) (models.Book, error)
 	DeleteBookByID(bookId int) error
 	UpdateBookByID(bookId int, bookData models.Book) (int, error)
@@ -84,16 +84,16 @@ func (db Database) GetAllBooks(booksFilter map[string][]string) (*models.BookLis
 	return list, nil
 }
 
-func (db Database) CreateBook(book *models.Book) error {
+func (db Database) CreateBook(book *models.Book) (int, error) {
 	var id int
 	query := `INSERT INTO books (name, genre, price, amount) VALUES ($1, $2, $3, $4) RETURNING id`
 	err := db.Conn.QueryRow(query, book.Name, book.Genre, book.Price, book.Amount).Scan(&id)
 	if err != nil {
 		book.ID = 0
-		return err
+		return 0, err
 	}
 	book.ID = id
-	return nil
+	return id, nil
 }
 
 func (db Database) GetBookByID(bookId int) (models.Book, error) {

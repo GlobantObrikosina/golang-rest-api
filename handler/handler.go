@@ -21,22 +21,22 @@ func NewHandler(service *service.BooksManagerService) *Handler {
 
 func (h *Handler) InitRoutes() http.Handler {
 	router := chi.NewRouter()
-	router.MethodNotAllowed(methodNotAllowedHandler)
-	router.NotFound(notFoundHandler)
+	router.MethodNotAllowed(MethodNotAllowedHandler)
+	router.NotFound(NotFoundHandler)
 	router.Route("/books", h.books)
 	return router
 }
 
-func methodNotAllowedHandler(w http.ResponseWriter, r *http.Request) {
+func MethodNotAllowedHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-type", "application/json")
 	w.WriteHeader(405)
 	_ = render.Render(w, r, ErrMethodNotAllowed)
 }
 
-func notFoundHandler(w http.ResponseWriter, r *http.Request) {
+func NotFoundHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-type", "application/json")
 	w.WriteHeader(400)
-	_ = render.Render(w, r, ErrNotFound)
+	_ = render.Render(w, r, ErrorRenderer(fmt.Errorf("resource not found")))
 }
 
 var bookIDKey = "bookID"
@@ -99,11 +99,12 @@ func (h *Handler) CreateBook(w http.ResponseWriter, r *http.Request) {
 		_ = render.Render(w, r, ErrorRenderer(err))
 		return
 	}
-	if err := h.service.CreateBook(book); err != nil {
+	id, err := h.service.CreateBook(book);
+	if err != nil {
 		_ = render.Render(w, r, ServerErrorRenderer(err))
 		return
 	}
-	if err := render.Render(w, r, models.CreateBookResponse{BookID: book.ID}); err != nil {
+	if err := render.Render(w, r, models.CreateBookResponse{BookID: id}); err != nil {
 		_ = render.Render(w, r, ServerErrorRenderer(err))
 		return
 	}

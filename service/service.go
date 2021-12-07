@@ -5,9 +5,11 @@ import (
 	"github.com/GlobantObrikosina/golang-rest-api/models"
 )
 
+//go:generate mockgen -source=./service.go -destination=./mocks/mock.go
+
 type DatabaseBooksManager interface {
 	GetAllBooks(filterCondition map[string][]string) (*models.BookList, error)
-	CreateBook(book *models.Book) error
+	CreateBook(book *models.Book) (int, error)
 	GetBookByID(bookId int) (models.Book, error)
 	DeleteBookByID(bookId int) error
 	UpdateBookByID(bookId int, bookData models.Book) (int, error)
@@ -22,7 +24,7 @@ func NewService(repo db.DatabaseBooksManager) *BooksManagerService {
 	return &BooksManagerService{repo: repo}
 }
 
-func (s *BooksManagerService) CreateBook(book *models.Book) error {
+func (s *BooksManagerService) CreateBook(book *models.Book) (int, error) {
 	return s.repo.CreateBook(book)
 }
 

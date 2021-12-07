@@ -5,17 +5,25 @@ import (
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/GlobantObrikosina/golang-rest-api/models"
 	"github.com/stretchr/testify/assert"
+	"log"
 	"regexp"
 	"testing"
 )
 
-func MockDB() (DatabaseBooksManager, sqlmock.Sqlmock) {
-	db, mock, _ := sqlmock.New()
-	return Database{db}, mock
+func MockDB() (DatabaseBooksManager, sqlmock.Sqlmock, error) {
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		return nil, nil, err
+	}
+	return Database{db}, mock, nil
 }
 
 func TestGetAllBooks(t *testing.T) {
-	repo, mock := MockDB()
+	repo, mock, mockError := MockDB()
+	if mockError != nil {
+		log.Printf("Could not mock database: %v\n", mockError)
+		return
+	}
 
 	type mockBehavior func(filterCondition map[string][]string)
 	tests := []struct {
@@ -97,7 +105,12 @@ func TestGetAllBooks(t *testing.T) {
 }
 
 func TestAddBook(t *testing.T) {
-	repo, mock := MockDB()
+	repo, mock, mockError := MockDB()
+	if mockError != nil {
+		log.Printf("Could not mock database: %v\n", mockError)
+		return
+	}
+
 	type mockBehavior func(mock sqlmock.Sqlmock, returnedId int, book models.Book)
 	tests := []struct {
 		name         string
@@ -172,7 +185,12 @@ func TestAddBook(t *testing.T) {
 }
 
 func TestGetBookById(t *testing.T) {
-	repo, mock := MockDB()
+	repo, mock, mockError := MockDB()
+	if mockError != nil {
+		log.Printf("Could not mock database: %v\n", mockError)
+		return
+	}
+
 	type mockBehavior func(inputId int)
 	tests := []struct {
 		name         string
@@ -222,7 +240,12 @@ func TestGetBookById(t *testing.T) {
 }
 
 func TestDeleteBook(t *testing.T) {
-	repo, mock := MockDB()
+	repo, mock, mockError := MockDB()
+	if mockError != nil {
+		log.Printf("Could not mock database: %v\n", mockError)
+		return
+	}
+
 	type mockBehavior func(inputId int)
 	tests := []struct {
 		name         string
@@ -262,7 +285,12 @@ func TestDeleteBook(t *testing.T) {
 }
 
 func TestUpdateBook(t *testing.T) {
-	repo, mock := MockDB()
+	repo, mock, mockError := MockDB()
+	if mockError != nil {
+		log.Printf("Could not mock database: %v\n", mockError)
+		return
+	}
+
 	type mockBehavior func(inputId int, inputBook models.Book)
 	tests := []struct {
 		name         string

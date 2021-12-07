@@ -98,7 +98,7 @@ func TestCreateBook(t *testing.T) {
 				Amount: 1,
 			},
 			mockBehavior: func(r *mock.MockDatabaseBooksManager, book *models.Book) {
-				r.EXPECT().CreateBook(book).Return(nil)
+				r.EXPECT().CreateBook(book).Return(0, nil)
 			},
 			expectedStatusCode:   http.StatusOK,
 			expectedResponseBody: "{\"id\":0}\n",
@@ -142,7 +142,7 @@ func TestCreateBook(t *testing.T) {
 				Amount: 7,
 			},
 			mockBehavior: func(r *mock.MockDatabaseBooksManager, book *models.Book) {
-				r.EXPECT().CreateBook(book).Return(errors.New("input book name isn't unique"))
+				r.EXPECT().CreateBook(book).Return(0, errors.New("input book name isn't unique"))
 			},
 			expectedStatusCode:   http.StatusInternalServerError,
 			expectedResponseBody: "{\"status_text\":\"Internal server error\",\"message\":\"input book name isn't unique\"}\n",

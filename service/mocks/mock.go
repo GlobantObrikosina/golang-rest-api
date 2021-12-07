@@ -49,11 +49,12 @@ func (mr *MockDatabaseBooksManagerMockRecorder) Close() *gomock.Call {
 }
 
 // CreateBook mocks base method.
-func (m *MockDatabaseBooksManager) CreateBook(book *models.Book) error {
+func (m *MockDatabaseBooksManager) CreateBook(book *models.Book) (int, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateBook", book)
-	ret0, _ := ret[0].(error)
-	return ret0
+	ret0, _ := ret[0].(int)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // CreateBook indicates an expected call of CreateBook.
